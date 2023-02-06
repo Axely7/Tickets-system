@@ -6,12 +6,15 @@ const ticketControl = new TicketControl();
 const socketController = (socket) => {
 
     socket.emit('ultimo-ticket', ticketControl.ultimo)
+    socket.emit('estado-actual', ticketControl.ultimos4)
+
+    socket.emit('tickets-pendientes', ticketControl.tickets.length)
     
     socket.on('siguient-ticket', ( payload, callback ) => {
         
         const siguiente = ticketControl.siguiente();
         callback(siguiente)
-
+        socket.broadcast.emit('tickets-pendientes', ticketControl.tickets.length)
         // TODO: Notificar que hay un nuevo ticket pendiente de asignar
 
     })
@@ -27,6 +30,11 @@ const socketController = (socket) => {
         const ticket = ticketControl.atenderTicket(escritorio)
 
         // TODO: Notificat cambio en los ultimos4
+        socket.broadcast.emit('estado-actual', ticketControl.ultimos4)
+        socket.emit('tickets-pendientes', ticketControl.tickets.length)
+        socket.broadcast.emit('tickets-pendientes', ticketControl.tickets.length)
+
+
 
         if(!ticket){
             callback({
